@@ -461,6 +461,15 @@ class MyJob < ApplicationJob
     # Can be an Integer or Lambda/Proc that is invoked in the context of the job
     perform_limit: 1,
 
+    # If true, the job class name will be part of this jobs concurrency key
+    # This allows two distinct job classes to set the same key (like a model id)
+    # without manually specifying a unique prefix for each job
+    unique_across_jobs: false
+
+    # If true, the job queue name will be part of this jobs concurrency key
+    # MyJob.perform_later("Alice") and MyJob.set(queue: "other").perform_later("Alice") would be considered distinct
+    unique_across_queues: false
+
     # Note: Under heavy load, the total number of jobs may exceed the
     # sum of `enqueue_limit` and `perform_limit` because of race conditions
     # caused by imperfectly disjunctive states. If you need to constrain

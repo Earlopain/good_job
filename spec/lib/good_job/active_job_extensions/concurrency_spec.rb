@@ -194,6 +194,50 @@ RSpec.describe GoodJob::ActiveJobExtensions::Concurrency do
       end
     end
 
+    describe 'unique_across_jobs: and unique_across_queues:' do
+      before do
+        stub_const 'TestJob', (Class.new(ActiveJob::Base) do
+          include GoodJob::ActiveJobExtensions::Concurrency
+          def perform(arg)
+          end
+        end)
+      end
+
+      it 'includes the job name in the concurrency key if unique_across_jobs is true' do
+        TestJob.good_job_control_concurrency_with(
+          unique_across_jobs: true,
+          key: -> { arguments.first }
+        )
+        job = TestJob.perform_later("Alice")
+
+        expect(job.good_job_concurrency_key).to eq("TestJob-Alice")
+      end
+
+      it 'includes the job name in the concurrency key if unique_across_queues is true' do
+        TestJob.good_job_control_concurrency_with(
+          unique_across_queues: true,
+          key: -> { arguments.first }
+        )
+
+        first_job = TestJob.perform_later("Alice")
+        expect(first_job.good_job_concurrency_key).to eq("default-Alice")
+
+        second_job = TestJob.set(queue: :other_queue).perform_later("Bob")
+        expect(second_job.good_job_concurrency_key).to eq("other_queue-Bob")
+      end
+
+      it 'includes the job name and queue in the concurrency key if both are true' do
+        TestJob.good_job_control_concurrency_with(
+          unique_across_jobs: true,
+          unique_across_queues: true,
+          key: -> { arguments.first }
+        )
+
+        job = TestJob.perform_later("Alice")
+        expect(job.good_job_concurrency_key).to eq("TestJob-default-Alice")
+      end
+    end
+
     describe '#perform_later' do
       before do
         stub_const 'TestJob', (Class.new(ActiveJob::Base) do

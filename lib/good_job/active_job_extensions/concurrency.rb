@@ -83,6 +83,8 @@ module GoodJob
 
       class_methods do
         def good_job_control_concurrency_with(config)
+          config[:unique_across_jobs] = false if config[:unique_across_jobs].nil?
+          config[:unique_across_queues] = false if config[:unique_across_queues].nil?
           self.good_job_concurrency_config = config
         end
       end
@@ -102,7 +104,12 @@ module GoodJob
         key = instance_exec(&key) if key.respond_to?(:call)
         raise TypeError, "Concurrency key must be a String; was a #{key.class}" unless VALID_TYPES.any? { |type| key.is_a?(type) }
 
-        key
+        parts = []
+        parts << self.class.name if self.class.good_job_concurrency_config[:unique_across_jobs]
+        parts << queue_name if self.class.good_job_concurrency_config[:unique_across_queues]
+        parts << key
+
+        parts.join("-")
       end
 
       private
