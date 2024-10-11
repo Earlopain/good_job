@@ -99,6 +99,9 @@ jobs:
           - ruby: 3.3
             gemfile: rails_7.2
             pg: 10
+          - ruby: jruby-9.4
+            gemfile: rails_7.0 # Tied to the jdbc adapter, doesn't support higher Rails at the moment
+            pg: 17
         exclude:
           # Rails 7.2 is >= 3.1
           - ruby: "3.0"

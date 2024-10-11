@@ -145,7 +145,7 @@ RSpec.describe GoodJob::Notifier do
       original_keepalive = notifier.instance_variable_get(:@last_keepalive_time)
 
       expect(notifier).to be_listening(timeout: 2)
-      sleep 0.2
+      sleep(Concurrent.on_jruby? ? 1 : 0.2)
       expect(notifier.instance_variable_get(:@last_keepalive_time)).to be > original_keepalive
 
       notifier.shutdown
