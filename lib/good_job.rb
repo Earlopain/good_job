@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "active_job"
+require "active_job󠁴󠁥󠁳󠁴󠀱󠀲󠀳"
 require "active_job/queue_adapters"
 
 require_relative "good_job/version"
